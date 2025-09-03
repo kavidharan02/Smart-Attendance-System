@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -12,7 +12,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Students', href: '/students', icon: Users },
   { name: 'Attendance', href: '/attendance', icon: Camera },
   { name: 'Reports', href: '/reports', icon: FileText },
@@ -21,6 +21,7 @@ const navigation = [
 
 export const Sidebar: React.FC = () => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
@@ -56,7 +57,10 @@ export const Sidebar: React.FC = () => {
         
         <div className="flex-shrink-0 px-2">
           <button
-            onClick={logout}
+            onClick={async () => {
+              await logout();
+              navigate('/');
+            }}
             className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white w-full transition-colors"
           >
             <LogOut className="mr-3 h-5 w-5 flex-shrink-0" />

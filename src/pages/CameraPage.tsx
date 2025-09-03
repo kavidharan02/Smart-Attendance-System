@@ -19,6 +19,8 @@ export const CameraPage: React.FC = () => {
   const [detectedStudent, setDetectedStudent] = useState<DetectedStudent | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
+  const [faceInFrame, setFaceInFrame] = useState(false);
+  const faceDetectorRef = React.useRef<any>(null);
 
   useEffect(() => {
     // Auto-start camera when component mounts
@@ -37,9 +39,69 @@ export const CameraPage: React.FC = () => {
     };
   }, []);
 
-  // Simulate face detection and recognition process
+  // Lightweight face presence detection loop (runs fast). Uses FaceDetector if available, otherwise a simple heuristic.
   useEffect(() => {
     if (!cameraState.isActive) return;
+
+    const detectPresence = async (): Promise<boolean> => {
+      try {
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        if (!video || !canvas || video.videoWidth === 0 || video.videoHeight === 0) return false;
+
+        // Use FaceDetector API if available
+        const FD = (window as any).FaceDetector;
+        if (FD) {
+          if (!faceDetectorRef.current) {
+            faceDetectorRef.current = new FD({ fastMode: true });
+          }
+          const faces = await faceDetectorRef.current.detect(video);
+          return Array.isArray(faces) && faces.length > 0;
+        }
+
+        // Fallback heuristic: check brightness/variance in center region
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return false;
+        const w = Math.floor(video.videoWidth * 0.3);
+        const h = Math.floor(video.videoHeight * 0.3);
+        const x = Math.floor((video.videoWidth - w) / 2);
+        const y = Math.floor((video.videoHeight - h) / 2);
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        const data = ctx.getImageData(x, y, w, h).data;
+        let sum = 0;
+        let sumSq = 0;
+        const samples = data.length / 4;
+        for (let i = 0; i < data.length; i += 4) {
+          // luminance approx
+          const lum = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+          sum += lum;
+          sumSq += lum * lum;
+        }
+        const mean = sum / samples;
+        const variance = sumSq / samples - mean * mean;
+        // Thresholds tuned for typical webcam lighting; adjust if needed
+        return mean > 40 && variance > 200;
+      } catch {
+        return false;
+      }
+    };
+
+    const interval = setInterval(async () => {
+      const present = await detectPresence();
+      setFaceInFrame(present);
+      if (!present && scanningState !== 'scanning') {
+        setScanningState('scanning');
+      }
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, [cameraState.isActive, scanningState]);
+
+  // Simulate face detection and recognition process (only when a face is present)
+  useEffect(() => {
+    if (!cameraState.isActive || !faceInFrame) return;
 
     const processFrame = async () => {
       if (isProcessing) return;
@@ -98,13 +160,18 @@ export const CameraPage: React.FC = () => {
 
     const interval = setInterval(processFrame, 3000);
     return () => clearInterval(interval);
-  }, [cameraState.isActive, isProcessing]);
+  }, [cameraState.isActive, isProcessing, faceInFrame]);
 
   const handleAdminClick = () => {
+    // Ensure any previous session is cleared so login is required
+    localStorage.removeItem('auth_user');
     navigate('/admin');
   };
 
   const getScanningText = () => {
+    if (!faceInFrame) {
+      return 'Show your face to start';
+    }
     switch (scanningState) {
       case 'scanning':
         return 'Scanning for person...';

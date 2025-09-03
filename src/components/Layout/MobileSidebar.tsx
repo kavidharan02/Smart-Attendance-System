@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -18,7 +18,7 @@ interface MobileSidebarProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Students', href: '/students', icon: Users },
   { name: 'Attendance', href: '/attendance', icon: Camera },
   { name: 'Reports', href: '/reports', icon: FileText },
@@ -27,6 +27,7 @@ const navigation = [
 
 export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
@@ -76,7 +77,11 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose })
           
           <div className="flex-shrink-0 flex border-t border-gray-700 p-4">
             <button
-              onClick={logout}
+              onClick={async () => {
+                await logout();
+                onClose();
+                navigate('/');
+              }}
               className="flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white w-full transition-colors"
             >
               <LogOut className="mr-4 h-6 w-6 flex-shrink-0" />
