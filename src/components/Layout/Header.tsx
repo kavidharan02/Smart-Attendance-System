@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Bell } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface HeaderProps {
@@ -29,13 +29,6 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           </div>
           
           <div className="ml-4 flex items-center md:ml-6">
-            <button 
-              className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              title="Notifications"
-            >
-              <Bell className="h-6 w-6" />
-            </button>
-            
             <div className="ml-3 relative">
               <div className="flex items-center">
                 <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">

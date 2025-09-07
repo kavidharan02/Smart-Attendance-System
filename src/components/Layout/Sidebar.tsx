@@ -4,8 +4,6 @@ import {
   LayoutDashboard, 
   Users, 
   Camera, 
-  FileText, 
-  Settings, 
   LogOut,
   UserCheck
 } from 'lucide-react';
@@ -13,10 +11,8 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Students', href: '/students', icon: Users },
+  { name: 'Users', href: '/students', icon: Users },
   { name: 'Attendance', href: '/attendance', icon: Camera },
-  { name: 'Reports', href: '/reports', icon: FileText },
-  { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export const Sidebar: React.FC = () => {

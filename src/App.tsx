@@ -8,8 +8,7 @@ import { AdminLogin } from './pages/AdminLogin';
 import { Dashboard } from './pages/Dashboard';
 import { Students } from './pages/Students';
 import { Attendance } from './pages/Attendance';
-import { Reports } from './pages/Reports';
-import { Settings } from './pages/Settings';
+// Removed advanced pages for simplified admin panel
 
 function App() {
   const { user, loading } = useAuth();
@@ -52,16 +51,7 @@ function App() {
                 <Attendance />
               </Layout>
             } />
-            <Route path="/reports" element={
-              <Layout>
-                <Reports />
-              </Layout>
-            } />
-            <Route path="/settings" element={
-              <Layout>
-                <Settings />
-              </Layout>
-            } />
+            {/* Simplified: no Reports or Settings routes */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </>
         ) : (

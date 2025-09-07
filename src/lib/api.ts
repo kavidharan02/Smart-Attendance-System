@@ -114,18 +114,34 @@ class ApiClient {
     start_date?: string;
     end_date?: string;
   }): Promise<AttendanceRecord[]> {
-    // Mock implementation - replace with actual API call
-    return JSON.parse(localStorage.getItem('attendance_records') || '[]');
+    // Mock implementation with simple filtering
+    const all: AttendanceRecord[] = JSON.parse(localStorage.getItem('attendance_records') || '[]');
+    if (!filters) return all;
+    return all.filter(r => {
+      const inDate = filters.date ? r.date === filters.date : true;
+      const inStudent = filters.student_id ? r.student_id === filters.student_id : true;
+      const inRange = filters.start_date && filters.end_date
+        ? r.date >= filters.start_date && r.date <= filters.end_date
+        : true;
+      return inDate && inStudent && inRange;
+    });
   }
 
   async getAttendanceStats(date?: string): Promise<AttendanceStats> {
-    // Mock implementation - replace with actual API call
+    // Compute from storage for the given date (default today)
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    const students: Student[] = JSON.parse(localStorage.getItem('students') || '[]');
+    const records: AttendanceRecord[] = JSON.parse(localStorage.getItem('attendance_records') || '[]')
+      .filter(r => r.date === targetDate);
+
+    const present = records.filter(r => r.status === 'present').length;
+    const absent = Math.max(students.length - present, 0);
     return {
-      total_students: 150,
-      present_today: 120,
-      absent_today: 25,
-      late_today: 5,
-      attendance_rate: 80.0,
+      total_students: students.length,
+      present_today: present,
+      absent_today: absent,
+      late_today: 0,
+      attendance_rate: students.length > 0 ? (present / students.length) * 100 : 0,
     };
   }
 

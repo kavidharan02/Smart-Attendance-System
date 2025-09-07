@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, User } from 'lucide-react';
+import { Plus, Trash2, User } from 'lucide-react';
 import { Button } from '../components/UI/Button';
 import { Modal } from '../components/UI/Modal';
 import { StudentForm } from '../components/Students/StudentForm';
@@ -57,10 +57,7 @@ export const Students: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleEditStudent = (student: Student) => {
-    setEditingStudent(student);
-    setShowModal(true);
-  };
+  // Simplified: edit not required; modal reused for add only
 
   const handleDeleteStudent = async (student: Student) => {
     if (!confirm(`Are you sure you want to delete ${student.name}?`)) {
@@ -136,8 +133,7 @@ export const Students: React.FC = () => {
                 <span className="text-sm text-gray-500">{student.student_id}</span>
               </div>
               
-              <p className="text-sm text-gray-600 mb-1">{student.email}</p>
-              <p className="text-sm text-gray-600 mb-4">{student.department}</p>
+              {/* Minimal: no email/department */}
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1">
@@ -150,12 +146,6 @@ export const Students: React.FC = () => {
                 </div>
                 
                 <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleEditStudent(student)}
-                    className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </button>
                   <button
                     onClick={() => handleDeleteStudent(student)}
                     className="p-1 text-gray-400 hover:text-red-600 transition-colors"

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserCheck, UserX, Clock, TrendingUp } from 'lucide-react';
-import { StatCard } from '../components/UI/StatCard';
-import { AttendanceChart } from '../components/Reports/AttendanceChart';
+import { Users, UserCheck, UserX } from 'lucide-react';
 import { AttendanceStats, AttendanceRecord } from '../types';
 import { api } from '../lib/api';
 import { format, subDays } from 'date-fns';
@@ -9,7 +7,7 @@ import { format, subDays } from 'date-fns';
 export const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [recentAttendance, setRecentAttendance] = useState<AttendanceRecord[]>([]);
-  const [weeklyData, setWeeklyData] = useState<number[]>([]);
+  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,11 +29,7 @@ export const Dashboard: React.FC = () => {
       });
       setRecentAttendance(records.slice(0, 10)); // Latest 10 records
 
-      // Generate mock weekly data for chart
-      const mockWeeklyData = Array.from({ length: 7 }, () => 
-        Math.floor(Math.random() * 50) + 20
-      );
-      setWeeklyData(mockWeeklyData);
+      
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       // Set mock data for demo
@@ -47,40 +41,13 @@ export const Dashboard: React.FC = () => {
         attendance_rate: 80.0,
       });
       setRecentAttendance([]);
-      setWeeklyData([45, 52, 48, 61, 42, 58, 49]);
+      
     } finally {
       setLoading(false);
     }
   };
 
-  const weeklyChartData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [
-      {
-        label: 'Attendance',
-        data: weeklyData,
-        backgroundColor: 'rgba(37, 99, 235, 0.5)',
-        borderColor: 'rgba(37, 99, 235, 1)',
-        borderWidth: 2,
-      },
-    ],
-  };
-
-  const attendanceDistribution = {
-    labels: ['Present', 'Absent', 'Late'],
-    datasets: [
-      {
-        data: stats ? [stats.present_today, stats.absent_today, stats.late_today] : [0, 0, 0],
-        backgroundColor: [
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(239, 68, 68, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-        ],
-        borderWidth: 2,
-        borderColor: '#fff',
-      },
-    ],
-  };
+  // Charts removed for minimal dashboard
 
   if (loading) {
     return (
@@ -97,52 +64,34 @@ export const Dashboard: React.FC = () => {
         <p className="text-gray-600">Overview of today's attendance</p>
       </div>
 
-      {/* Stats Cards */}
+      {/* Minimal stats */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Total Students"
-            value={stats.total_students}
-            icon={Users}
-            color="blue"
-          />
-          <StatCard
-            title="Present Today"
-            value={stats.present_today}
-            icon={UserCheck}
-            color="green"
-            change={{ value: 5.2, label: 'from yesterday' }}
-          />
-          <StatCard
-            title="Absent Today"
-            value={stats.absent_today}
-            icon={UserX}
-            color="red"
-            change={{ value: -2.1, label: 'from yesterday' }}
-          />
-          <StatCard
-            title="Late Today"
-            value={stats.late_today}
-            icon={Clock}
-            color="yellow"
-            change={{ value: 1.3, label: 'from yesterday' }}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-lg shadow flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-500">Total Users</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.total_students}</div>
+            </div>
+            <Users className="h-8 w-8 text-blue-500" />
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-500">Present Today</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.present_today}</div>
+            </div>
+            <UserCheck className="h-8 w-8 text-green-500" />
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-500">Absent Today</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.absent_today}</div>
+            </div>
+            <UserX className="h-8 w-8 text-red-500" />
+          </div>
         </div>
       )}
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AttendanceChart
-          type="bar"
-          data={weeklyChartData}
-          title="Weekly Attendance Trend"
-        />
-        <AttendanceChart
-          type="doughnut"
-          data={attendanceDistribution}
-          title="Today's Attendance Distribution"
-        />
-      </div>
+      
 
       {/* Recent Attendance */}
       <div className="bg-white shadow rounded-lg">
@@ -153,14 +102,9 @@ export const Dashboard: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Time
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -177,14 +121,9 @@ export const Dashboard: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {format(new Date(record.date), 'MMM dd, yyyy')}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {record.time_in}
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        record.status === 'present' ? 'bg-green-100 text-green-800' :
-                        record.status === 'late' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                        record.status === 'present' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
                         {record.status}
                       </span>

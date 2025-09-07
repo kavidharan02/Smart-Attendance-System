@@ -19,8 +19,6 @@ export const StudentForm: React.FC<StudentFormProps> = ({
   const [formData, setFormData] = useState({
     student_id: initialData?.student_id || '',
     name: initialData?.name || '',
-    email: initialData?.email || '',
-    department: initialData?.department || '',
   });
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(
@@ -94,16 +92,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
     }
   };
 
-  const departments = [
-    'Computer Science',
-    'Information Technology',
-    'Electronics',
-    'Mechanical',
-    'Civil',
-    'Electrical',
-    'Chemical',
-    'Other',
-  ];
+  // Simplified: no departments/email
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -177,44 +166,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
         />
       </div>
 
-      {/* Email */}
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email Address
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholder="john.doe@example.com"
-        />
-      </div>
-
-      {/* Department */}
-      <div>
-        <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">
-          Department
-        </label>
-        <select
-          id="department"
-          name="department"
-          value={formData.department}
-          onChange={handleInputChange}
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">Select Department</option>
-          {departments.map((dept) => (
-            <option key={dept} value={dept}>
-              {dept}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Removed email and department for minimal schema */}
 
       {/* Form Actions */}
       <div className="flex justify-end space-x-3 pt-4 border-t">

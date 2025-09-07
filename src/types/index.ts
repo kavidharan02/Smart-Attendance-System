@@ -9,8 +9,8 @@ export interface Student {
   id: string;
   student_id: string;
   name: string;
-  email: string;
-  department: string;
+  email?: string;
+  department?: string;
   photo_url?: string;
   face_embedding?: number[];
   created_at: string;
