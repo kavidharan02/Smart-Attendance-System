@@ -30,8 +30,8 @@ dist-ssr
 __pycache__/
 *.pyc
 
-# Ignore large model files
-*.pb
+# Ignore large model files (except facenet.pb)
 *.ckpt*
 *.data-*
 models/
+!backend/ml/models/20180402-114759/facenet.pb
