@@ -1,32 +1,38 @@
-# backend/ml/face_detector.py
-
-import mediapipe as mp
 import cv2
+import mediapipe as mp
 
 class FaceDetector:
-    def __init__(self, min_detection_confidence=0.5):
-        self.mp_face = mp.solutions.face_detection
-        self.detector = self.mp_face.FaceDetection(
-            model_selection=1, 
-            min_detection_confidence=min_detection_confidence
+    def __init__(self):
+        self.mp_face_detection = mp.solutions.face_detection
+        self.face_detection = self.mp_face_detection.FaceDetection(
+            model_selection=1,  # Use full range model for better detection
+            min_detection_confidence=0.3  # Lower threshold to catch more faces
         )
 
     def detect_faces(self, frame):
-        """
-        Detect faces in a BGR frame and return bounding boxes.
-        Returns list of bounding boxes [(x1, y1, x2, y2), ...]
-        """
-        h, w, _ = frame.shape
+        """Detect faces and return bounding boxes (x, y, w, h)."""
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = self.detector.process(rgb_frame)
+        results = self.face_detection.process(rgb_frame)
 
-        bboxes = []
+        faces = []
         if results.detections:
+            h, w, _ = frame.shape
             for detection in results.detections:
                 bboxC = detection.location_data.relative_bounding_box
-                x1 = max(0, int(bboxC.xmin * w))
-                y1 = max(0, int(bboxC.ymin * h))
-                x2 = min(w, x1 + int(bboxC.width * w))
-                y2 = min(h, y1 + int(bboxC.height * h))
-                bboxes.append((x1, y1, x2, y2))
-        return bboxes
+                # Convert relative coordinates to absolute
+                x = int(bboxC.xmin * w)
+                y = int(bboxC.ymin * h)
+                w_box = int(bboxC.width * w)
+                h_box = int(bboxC.height * h)
+                
+                # Ensure coordinates are within frame bounds
+                x = max(0, x)
+                y = max(0, y)
+                w_box = min(w_box, w - x)
+                h_box = min(h_box, h - y)
+                
+                # Only add if face is large enough
+                if w_box > 20 and h_box > 20:
+                    faces.append((x, y, w_box, h_box))
+                    
+        return faces

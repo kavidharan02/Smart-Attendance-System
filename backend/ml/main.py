@@ -1,52 +1,67 @@
-# backend/ml/main.py
-
 import cv2
 from face_detector import FaceDetector
 from face_recognizer import FaceRecognizer
-import torch
-import pandas as pd
-from datetime import datetime
-
-# 1️⃣ Initialize
-detector = FaceDetector(min_detection_confidence=0.6)
-# Example: pre-load some embeddings (replace with your actual known faces)
-known_embeddings = {}  # {'Alice': tensor_embedding, 'Bob': tensor_embedding}
-recognizer = FaceRecognizer(known_embeddings=known_embeddings)
-
-# 2️⃣ Attendance CSV
-attendance_file = "attendance.csv"
-try:
-    df = pd.read_csv(attendance_file)
-except FileNotFoundError:
-    df = pd.DataFrame(columns=["Name", "Time"])
-
-# 3️⃣ Start webcam
-cap = cv2.VideoCapture(0)
-
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
-
-    # Detect faces
-    bboxes = detector.detect_faces(frame)
     
-    for (x1, y1, x2, y2) in bboxes:
-        face_img = frame[y1:y2, x1:x2]
-        name = recognizer.recognize(face_img)
 
-        # Draw rectangle and name
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
-        cv2.putText(frame, name, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0), 2)
+def main():
+    detector = FaceDetector()
+    recognizer = FaceRecognizer()
 
-        # Log attendance
-        if name != "Unknown" and name not in df["Name"].values:
-            df = pd.concat([df, pd.DataFrame([[name, datetime.now().strftime("%H:%M:%S")]], columns=df.columns)], ignore_index=True)
-            df.to_csv(attendance_file, index=False)
+    # Store reference embeddings (you can extend this with a database)
+    known_embeddings = {}
+    
+    cap = cv2.VideoCapture(0)
 
-    cv2.imshow("Attendance", frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-cap.release()
-cv2.destroyAllWindows()
+        faces = detector.detect_faces(frame)
+        
+        # Debug: show face count
+        cv2.putText(frame, f"Faces: {len(faces)}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+        for (x, y, w, h) in faces:
+            face_img = frame[y:y+h, x:x+w]
+
+            # Extract embedding
+            emb = recognizer.get_embedding(face_img)
+            
+            if emb is None:
+                continue  # Skip if no valid face
+
+            # Simple demo: check against known embeddings
+            identity = "Unknown"
+            for name, ref_emb in known_embeddings.items():
+                dist, match = recognizer.compare_embeddings(emb, ref_emb)
+                if match:
+                    identity = name
+                    break
+
+            # Draw box & name
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            cv2.putText(frame, identity, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0), 2)
+
+        cv2.imshow("Face Recognition", frame)
+        key = cv2.waitKey(1)
+
+        # Press "s" to save a face embedding as known
+        if key == ord("s") and faces:
+            x, y, w, h = faces[0]
+            face_img = frame[y:y+h, x:x+w]
+            emb = recognizer.get_embedding(face_img)
+            if emb is not None:
+                known_embeddings["User1"] = emb
+                print("Saved embedding for User1")
+            else:
+                print("No valid face detected to save")
+
+        if key == ord("q"):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()

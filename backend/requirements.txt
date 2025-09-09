@@ -1,0 +1,24 @@
+# requirements.txt
+
+# Core ML
+tensorflow==2.12.0
+protobuf>=4.25.3,<5
+numpy==1.23.5
+scikit-learn==1.2.2
+
+# Face recognition + embeddings
+facenet-pytorch==2.5.3
+
+# MediaPipe for face detection
+mediapipe==0.10.21
+
+# Computer Vision
+opencv-python==4.7.0.72
+
+# Torch (for facenet-pytorch)
+torch==2.0.1
+torchvision==0.15.2
+
+# Utils
+matplotlib==3.7.1
+Pillow==9.5.0
