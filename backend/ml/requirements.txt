@@ -1,0 +1,7 @@
+
+pandas
+mediapipe==0.10.14
+opencv-python
+torch
+facenet-pytorch
+numpy
